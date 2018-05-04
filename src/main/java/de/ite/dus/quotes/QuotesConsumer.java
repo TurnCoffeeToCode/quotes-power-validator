@@ -14,7 +14,7 @@ public class QuotesConsumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QuotesConsumer.class);
 
-    @KafkaListener(topics = "${kafka.topic.quotes}")
+    @KafkaListener(topics = "${kafka.topic.quotes.consumer}")
     public void receive(QuotesSet quotes) {
         LOGGER.info("received quotes='{}'", quotes);
     }
