@@ -8,12 +8,12 @@ import java.time.Year;
 
 @Getter
 @Setter
-public class MonthProduct implements Product {
+public class MonthProduct {
 
     private Year year;
     private Month month;
 
-    private Quote baseQuote;
-    private Quote peakQuote;
+    private Quote base;
+    private Quote peak;
 
 }

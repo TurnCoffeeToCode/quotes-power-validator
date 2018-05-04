@@ -7,11 +7,11 @@ import java.time.Year;
 
 @Getter
 @Setter
-public class YearProduct implements Product {
+public class YearProduct {
 
     private Year year;
 
-    private Quote baseQuote;
-    private Quote peakQuote;
+    private Quote base;
+    private Quote peak;
 
 }

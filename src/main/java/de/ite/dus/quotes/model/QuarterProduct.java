@@ -7,7 +7,7 @@ import java.time.Year;
 
 @Getter
 @Setter
-public class QuarterProduct implements Product {
+public class QuarterProduct {
     public enum Quarter {
         Q1, Q2, Q3, Q4
     }
@@ -15,6 +15,6 @@ public class QuarterProduct implements Product {
     private Year year;
     private Quarter quarter;
 
-    private Quote baseQuote;
-    private Quote peakQuote;
+    private Quote base;
+    private Quote peak;
 }

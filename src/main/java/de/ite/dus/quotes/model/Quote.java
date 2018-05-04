@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Quote {
-    private PriceEurMWh bidPrice;
-    private PriceEurMWh askPrice;
+    private PriceEurMWh bid;
+    private PriceEurMWh ask;
 }
