@@ -1,7 +1,13 @@
 package de.ite.dus.quotes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.ite.dus.quotes.model.*;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import de.ite.dus.quotes.model.MonthProduct;
+import de.ite.dus.quotes.model.QuarterProduct;
+import de.ite.dus.quotes.model.QuotesSet;
+import de.ite.dus.quotes.model.YearProduct;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -16,6 +22,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class QuotesSetDeserializerTest {
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    @Before
+    public void configureObjectMapper() {
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
+
 
     @Test
     public void deserializeQuotesSet_singleMonthProduct() throws IOException {
@@ -23,8 +37,8 @@ public class QuotesSetDeserializerTest {
     }
 
     private void assertSingleMonthProduct(QuotesSet quotesSet) {
-        assertThat(quotesSet.getProducts()).hasSize(1);
-        assertMonthProduct(quotesSet.getProducts().get(0));
+        assertThat(quotesSet.getMonthProducts()).hasSize(1);
+        assertMonthProduct(quotesSet.getMonthProducts().get(0));
     }
 
     @Test
@@ -33,8 +47,8 @@ public class QuotesSetDeserializerTest {
     }
 
     private void assertSingleQuarterProduct(QuotesSet quotesSet) {
-        assertThat(quotesSet.getProducts()).hasSize(1);
-        assertQuarterProduct(quotesSet.getProducts().get(0));
+        assertThat(quotesSet.getQuarterProducts()).hasSize(1);
+        assertQuarterProduct(quotesSet.getQuarterProducts().get(0));
     }
 
     @Test
@@ -43,8 +57,8 @@ public class QuotesSetDeserializerTest {
     }
 
     private void assertSingleYearProduct(QuotesSet quotesSet) {
-        assertThat(quotesSet.getProducts()).hasSize(1);
-        assertYearProduct(quotesSet.getProducts().get(0));
+        assertThat(quotesSet.getYearProducts()).hasSize(1);
+        assertYearProduct(quotesSet.getYearProducts().get(0));
     }
 
     @Test
@@ -54,51 +68,48 @@ public class QuotesSetDeserializerTest {
     }
 
     private void assertMonthQuarterAndYearProducts(QuotesSet quotesSet) {
-        assertThat(quotesSet.getProducts()).hasSize(3);
-        assertMonthProduct(quotesSet.getProducts().get(0));
-        assertQuarterProduct(quotesSet.getProducts().get(1));
-        assertYearProduct(quotesSet.getProducts().get(2));
+        assertSingleMonthProduct(quotesSet);
+        assertSingleQuarterProduct(quotesSet);
+        assertSingleYearProduct(quotesSet);
     }
 
     private void executeDeserializeQuotesSet(String jsonString, Consumer<QuotesSet> specificAsserter) throws IOException {
-        QuotesSet quotesSet = new ObjectMapper().readValue(jsonString, QuotesSet.class);
+        QuotesSet quotesSet = objectMapper.readValue(jsonString, QuotesSet.class);
         assertThat(quotesSet).isNotNull();
         assertThat(quotesSet.getTimestamp()).isNotNull();
         assertThat(quotesSet.getCountry()).isEqualTo(DE);
         specificAsserter.accept(quotesSet);
     }
 
-    private void assertMonthProduct(Product product) {
+    private void assertMonthProduct(MonthProduct product) {
         assertThat(product).isNotNull();
         assertThat(product).isExactlyInstanceOf(MonthProduct.class);
-        MonthProduct monthProduct = (MonthProduct) product;
-        assertThat(monthProduct.getMonth()).isEqualTo(MAY);
-        assertThat(monthProduct.getYear()).isEqualTo(Year.of(2021));
-        assertThat(monthProduct.getBaseQuote().getBidPrice().getValue().doubleValue()).isEqualTo(0.5001);
-        assertThat(monthProduct.getBaseQuote().getAskPrice().getValue().doubleValue()).isEqualTo(0.5201);
-        assertThat(monthProduct.getPeakQuote().getBidPrice().getValue().doubleValue()).isEqualTo(2.0001);
-        assertThat(monthProduct.getPeakQuote().getAskPrice().getValue().doubleValue()).isEqualTo(2.0201);
+        assertThat(product.getMonth()).isEqualTo(MAY);
+        assertThat(product.getYear()).isEqualTo(Year.of(2021));
+        assertThat(product.getBase().getBid().getValue().doubleValue()).isEqualTo(0.5001);
+        assertThat(product.getBase().getAsk().getValue().doubleValue()).isEqualTo(0.5201);
+        assertThat(product.getPeak().getBid().getValue().doubleValue()).isEqualTo(2.0001);
+        assertThat(product.getPeak().getAsk().getValue().doubleValue()).isEqualTo(2.0201);
     }
 
-    private void assertQuarterProduct(Product product) {
+    private void assertQuarterProduct(QuarterProduct product) {
         assertThat(product).isNotNull();
         assertThat(product).isExactlyInstanceOf(QuarterProduct.class);
-        QuarterProduct quarterProduct = (QuarterProduct) product;
-        assertThat(quarterProduct.getQuarter()).isEqualTo(Q2);
-        assertThat(quarterProduct.getYear()).isEqualTo(Year.of(2021));
-        assertThat(quarterProduct.getBaseQuote().getBidPrice().getValue().doubleValue()).isEqualTo(0.4999);
-        assertThat(quarterProduct.getBaseQuote().getAskPrice().getValue().doubleValue()).isEqualTo(0.5099);
-        assertThat(quarterProduct.getPeakQuote().getBidPrice().getValue().doubleValue()).isEqualTo(1.9998);
-        assertThat(quarterProduct.getPeakQuote().getAskPrice().getValue().doubleValue()).isEqualTo(2.0999);
+        assertThat(product.getQuarter()).isEqualTo(Q2);
+        assertThat(product.getYear()).isEqualTo(Year.of(2021));
+        assertThat(product.getBase().getBid().getValue().doubleValue()).isEqualTo(0.4999);
+        assertThat(product.getBase().getAsk().getValue().doubleValue()).isEqualTo(0.5099);
+        assertThat(product.getPeak().getBid().getValue().doubleValue()).isEqualTo(1.9998);
+        assertThat(product.getPeak().getAsk().getValue().doubleValue()).isEqualTo(2.0999);
     }
 
-    private void assertYearProduct(Product product) {
+    private void assertYearProduct(YearProduct product) {
         assertThat(product).isNotNull();
         assertThat(product).isExactlyInstanceOf(YearProduct.class);
         assertThat(product.getYear()).isEqualTo(Year.of(2021));
-        assertThat(product.getBaseQuote().getBidPrice().getValue().doubleValue()).isEqualTo(0.4899);
-        assertThat(product.getBaseQuote().getAskPrice().getValue().doubleValue()).isEqualTo(0.4998);
-        assertThat(product.getPeakQuote().getBidPrice().getValue().doubleValue()).isEqualTo(1.9898);
-        assertThat(product.getPeakQuote().getAskPrice().getValue().doubleValue()).isEqualTo(2.0899);
+        assertThat(product.getBase().getBid().getValue().doubleValue()).isEqualTo(0.4899);
+        assertThat(product.getBase().getAsk().getValue().doubleValue()).isEqualTo(0.4998);
+        assertThat(product.getPeak().getBid().getValue().doubleValue()).isEqualTo(1.9898);
+        assertThat(product.getPeak().getAsk().getValue().doubleValue()).isEqualTo(2.0899);
     }
 }
